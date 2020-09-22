@@ -3,7 +3,15 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": []
+    "types": [
+      "jquery",
+      "bootstrap",
+    ],
+    // "strict": true,
+  },
+  "angularCompilerOptions": {
+    "fullTemplateTypeCheck": true,
+    "strictInjectionParameters": true
   },
   "files": [
     "src/main.ts",

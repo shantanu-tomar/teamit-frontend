@@ -1,0 +1,115 @@
+<div>
+	<h3><b>Dashboard</b></h3>
+
+	<div class="row">
+		<div class="col-12 col-md-6 mt-3 mt-md-4">
+			<div class="card info-card-sm">
+				<h6 class="card-title"><b>Your Portals</b></h6>
+				<small class="text-muted card-subtitle">Portals you are a member of</small>
+				<div class="card-body mt-1 mx-1 card-body_list">
+					<ul class="list-unstyled custom-list">
+						<li *ngFor="let portal of myPortals">
+							<a routerLink="portals/{{portal['name']}}/">
+							{{portal['name']}}
+							</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-12 col-md-6 mt-3 mt-md-4">
+			<div class="card info-card-sm">
+
+				<h6 class="card-title"><b>Your Projects</b></h6>
+				<small class="text-muted card-subtitle">Projects you are a member of</small>
+				<div class="card-body mt-1 mx-1 card-body_list">
+					
+					<ul class="list-unstyled custom-list">
+						<li *ngFor="let project of myProjects">
+							<a routerLink="portals/{{project['portal']['name']}}/projects/{{project['id']}}/">
+								{{project['title']}}
+							</a>
+							
+							<span class="pull-right" title="Owner">
+								<i class="fa fa-user-o mr-1" aria-hidden="true"></i>
+								{{project["owner"]["name"]}}
+							</span>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-12 col-md-6 mt-3">
+			<div class="card info-card">
+				<h6 class="card-title"><b>Due Milestones</b></h6>
+				<small class="text-muted card-subtitle">Due milestones across all projects</small>
+				
+				<div class="card-body mt-1 mx-1 card-body_list" *ngIf="dueMilestones.length > 0; else noMilestone">
+				
+					<ul class="list-unstyled custom-list">
+						<li *ngFor="let stone of dueMilestones">
+							<a (click)="milestoneDetails(stone)" class="text-primary">
+								{{stone['milestone']}}
+							</a>
+
+							<span class="pull-right">
+								<span class="text-muted">due on:</span>
+								 {{stone["due_date"] | date: "dd /MMM /'y"}}
+							</span>
+						</li>
+					</ul>
+				</div>
+
+				<ng-template #noMilestone>
+					<div class="card-body text-center">
+						No Milestones To Be Achieved
+					</div>
+				</ng-template>
+			</div>
+		</div>
+		
+		<div class="col-12 col-md-6 mt-3">
+			<div class="card info-card">
+				<h6 class="card-title"><b>Your Due Tickets</b></h6>
+				<small class="text-muted card-subtitle">Tickets assigned to you</small>
+				
+				<div class="card-body mt-1 mx-1" *ngIf="doughnutTypeData.length > 0; else noDoughnut">
+					<div class="pull-right">
+						<select class="chart-select" (change)="doughnutFilter = $event.target.value">
+							<option value="type">Type</option>
+							<option value="status">Status</option>
+						</select>	
+					</div>
+
+					<div>
+						<canvas *ngIf="doughnutFilter == 'type'" baseChart 
+					    [data]="doughnutTypeData"
+					    [labels]="doughnutTypeLabels"
+					    [chartType]="doughnutChartType"
+							[options]="doughnutChartOptions"
+					    >
+					  </canvas>
+
+					  <canvas *ngIf="doughnutFilter == 'status'" baseChart 
+					    [data]="doughnutStatusData"
+					    [labels]="doughnutStatusLabels"
+					    [chartType]="doughnutChartType"
+							[options]="doughnutChartOptions"
+					    >
+					  </canvas>
+					</div>
+				</div>
+
+				<ng-template #noDoughnut>
+					<div class="card-body text-center">
+						No Tickets Yet
+					</div>
+				</ng-template>
+			</div>
+		</div>
+	</div>
+</div>

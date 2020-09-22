@@ -1,0 +1,273 @@
+<div *ngIf="project">
+	<h3>{{project['title']}} Tickets</h3>
+
+	<div class="row mt-3 mb-4">
+		<div class="col-12">
+			<label>Project Tickets:</label>
+			<div class="card" id="tableDiv">
+				<ng2-smart-table 
+					[settings]="settings" 
+					[source]="source" 
+					(edit)="ticketSelected($event.data.id)" 
+					(create)="addTicketEvent()">
+				</ng2-smart-table>
+			</div>
+		</div>
+	</div>
+
+	<hr *ngIf="selectedTicket"/>
+	
+	<div class="card container" id="ticketDetailDiv" style="margin-top: 50px" >
+		<div *ngIf="selectedTicket">
+			<div class="row">
+				<div class="col-12 mt-3">
+					<h4>Ticket Details</h4>
+				</div>
+			</div>
+		
+			<div class="row">
+				<div class="col-md-8 mb-4" id="ticketUpdateFormCol">
+					<form id="ticketUpdateForm" #ticketUpdateForm='ngForm' ngNativeValidate class="card-body form" (submit)="ticketUpdate(ticketUpdateForm)" >
+		      	<fieldset [disabled]="authorizedLevel != 'admin'">
+		          <div class="form-row mt-3">
+		          	<div class="col-12">
+		          		<label for="title" class="input-label">Title</label><span class="required">*</span>
+			            <input type='text' name='title' class='form-control' minlength="2" [(ngModel)]="selectedTicket['title']" maxlength="25" style="font-weight: bold" />
+		          	</div>
+		          </div>
+
+		          <div class="form-row mt-3">
+		            <label for="description" class="input-label">Description</label><br/>
+		            <textarea name='description' class='form-control' [(ngModel)]="selectedTicket['description']"></textarea>
+		          </div>
+		          
+		          <div class="form-row mt-3">
+		            <div class="col-md-6 col-12">
+		              <label for="assigned_to" class="input-label">Assigned to</label><br/>
+		              	<select class="w-100" name="assigned_to" [(ngModel)]="ticketResponsible">
+		                  <ng-container *ngFor="let member of project['member_set']">
+		                    <option value="{{member['id']}}">{{member['name']}}-{{member['id']}}</option>
+		                  </ng-container>
+		                </select>
+		            </div>
+
+		            <div class="col-md-6 col-12">
+		              <label for="submitter" class="input-label">Submitted by</label><span class="required">*</span><br/>
+		              	<select class="w-100" name="submitter" [(ngModel)]="selectedTicket['submitter']['id']" required>
+		                  <ng-container *ngFor="let member of project['member_set']">
+		                    <option value="{{member['id']}}">{{member['name']}}-{{member['id']}}</option>
+		                  </ng-container>
+		                </select>
+		            </div>
+		          </div>
+
+		          <div class="form-row mt-3">
+		            <div class="col-md-6 col-12">
+		              <label for="ticket_type" class="input-label">Ticket type</label><span class="required">*</span><br/>
+		              	<select class="w-100" name="ticket_type" [(ngModel)]="selectedTicket['ticket_type']" required>
+		                  <ng-container *ngFor="let type of projectChoices['TICKET_TYPES']">
+		                    <option value="{{type[0]}}">{{type[1]}}</option>
+		                  </ng-container>
+		                </select>
+		            </div>
+
+		            <div class="col-md-6 col-12">
+		              <label for="severity" class="input-label">Severity</label><span class="required">*</span><br/>
+		              	<select class="w-100" name="severity" [(ngModel)]="selectedTicket['severity']" required>
+		                  <ng-container *ngFor="let severty of projectChoices['TICKET_SEVERITY']">
+		                    <option value="{{severty[0]}}">{{severty[1]}}</option>
+		                  </ng-container>
+		                </select>
+		            </div>
+		          </div>
+
+		          <div class="form-row mt-3">
+		            <div class="col-md-6 col-12">
+		              <label for="status" class="input-label">Status</label><span class="required">*</span><br/>
+		              	<select class="w-100" name="status" [(ngModel)]="selectedTicket['status']" required>
+		                  <ng-container *ngFor="let status of projectChoices['TICKET_STATUS']">
+		                    <option value="{{status[0]}}">{{status[1]}}</option>
+		                  </ng-container>
+		                </select>
+		            </div>
+							</div>
+
+
+		          <div class="form-row mt-3">
+		            <div class="col-md-4 col-12">
+		              <label for="created" class="input-label">Submitted on</label><br/>
+		            	<input type="date" name="created" [(ngModel)]="selectedTicket['created']" disabled />
+		            </div>
+
+		            <div class="col-md-4 col-12">
+		              <label for="due_date" class="input-label">Due date</label><br/>
+		            	<input type="date" name="due_date" [(ngModel)]="selectedTicket['due_date']" />
+		            </div>
+							</div>
+		        </fieldset>
+						<hr/>
+		        <button type="submit" class="btn btn-primary" *ngIf="authorizedLevel == 'admin'">Update</button>
+		        <button type="button" class="btn btn-danger ml-1" *ngIf="authorizedLevel == 'admin'" (click)="deleteTicket(selectedTicket['id'])">Delete</button>
+		      </form>
+				</div>
+
+				<div class="col-md-4 col-12">
+					<h5>Comments</h5>
+					
+					<div id="commentsDiv">
+						<ng-container *ngFor="let comment of selectedTicketComments">
+							<div class="chat-container">
+								<p>
+									<b>{{comment['commenter']['name']}}</b>&nbsp;
+									<span class="text-muted commenter-role">({{comment['commenter']['role'] | lowercase }})</span><br/>
+									{{comment['comment']}}
+								</p>
+								<small class="text-muted chat-time">{{comment['created'] | date}}</small>
+							</div>
+						</ng-container>
+					</div>
+
+					<div class="comment-input-div mt-3">
+						<form #ticketCommentForm="ngForm" (submit)="ticketComment(ticketCommentForm)" ngNativeValidate >
+							<input type="text" name="ticketID" style="display: none" ngModel="{{selectedTicket['id']}}" />
+							<textarea name="comment" class="chatbox-input" placeholder="write a comment" ngModel required></textarea>
+							<div class="pull-right">
+								<button type="submit" class="ml-1 btn-sm btn" style="background-color: #E4E7EC">
+									<i class="fa fa-paper-plane mr-1" aria-hidden="true"></i>
+									Send
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+		<hr *ngIf="selectedTicket" />
+		<div class="row mt-3 mb-3" *ngIf="selectedTicket">
+			<div class="col-12 container">
+				<h5>Ticket History</h5>
+
+				<div style="max-height: 200px; overflow: auto">
+					<table id="ticketHistoryTable" class="table table-bordered" *ngIf="selectedTicket['tickethistory_set'].length > 0; else noHistory">
+						<tr>
+							<th>Change</th>
+							<th>Old Value</th>
+							<th>New Value</th>
+							<th>Date Changed</th>
+						</tr>
+
+						<ng-container *ngFor="let history of selectedTicket['tickethistory_set']">
+							<tr>
+								<td class="text-primary">{{history['change']}}</td>
+								<td>{{history['old_value']}}</td>
+								<td>{{history['new_value']}}</td>
+								<td>{{history['date_changed'] | date}}</td>
+							</tr>
+						</ng-container>
+					</table>
+
+					<ng-template #noHistory>
+						<h6>No history entries yet.</h6>
+					</ng-template>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- ADD TICKET MODAL -->
+	<div class="modal fade" id="addTicketModal" tabindex="-1" role="dialog" aria-labelledby="addTicketModalTitle" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+			  <div class="modal-header">
+					<h5 class="modal-title" id="addTicketModalTitle">Add Ticket To This Project</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					  <span aria-hidden="true">&times;</span>
+					</button>
+			  </div>
+				
+				<form #addTicketForm='ngForm' ngNativeValidate class="card-body form" (ngSubmit)="addTicket(addTicketForm)" >
+			  	<div class="modal-body">
+		      	<fieldset [disabled]="authorizedLevel != 'admin'">
+		      		<div class="form-row">
+		          	<div class="col-12">
+		          		<label for="title" class="input-label">Title</label><span class="required">*</span>
+			            <input type='text' name='title' class='form-control' minlength="2" ngModel maxlength="25" style="font-weight: bold" />
+		          	</div>
+		          </div>
+
+		          <div class="form-row mt-3">
+		            <label for="description" class="input-label">Description</label><br/>
+		            <textarea name='description' class='form-control' ngModel></textarea>
+		          </div>
+		          
+		          <div class="form-row mt-3">
+		            <div class="col-md-6 col-12">
+		              <label for="assigned_to" class="input-label">Assigned to</label><br/>
+		              	<select class="w-100" name="assigned_to" ngModel>
+		                  <ng-container *ngFor="let member of project['member_set']">
+		                    <option value="{{member['id']}}">{{member['name']}}-{{member['id']}}</option>
+		                  </ng-container>
+		                </select>
+		            </div>
+
+		            <div class="col-md-6 col-12">
+		              <label for="submitter" class="input-label">Submitted by</label><span class="required">*</span><br/>
+		              	<select class="w-100" name="submitter" ngModel required>
+		                  <ng-container *ngFor="let member of project['member_set']">
+		                    <option value="{{member['id']}}">{{member['name']}}-{{member['id']}}</option>
+		                  </ng-container>
+		                </select>
+		            </div>
+		          </div>
+
+		          <div class="form-row mt-3">
+		            <div class="col-md-6 col-12">
+		              <label for="ticket_type" class="input-label">Ticket type</label><span class="required">*</span><br/>
+		              	<select class="w-100" name="ticket_type" ngModel required>
+		                  <ng-container *ngFor="let type of projectChoices['TICKET_TYPES']">
+		                    <option value="{{type[0]}}">{{type[1]}}</option>
+		                  </ng-container>
+		                </select>
+		            </div>
+
+		            <div class="col-md-6 col-12">
+		              <label for="severity" class="input-label">Severity</label><span class="required">*</span><br/>
+		              	<select class="w-100" name="severity" ngModel required>
+		                  <ng-container *ngFor="let severty of projectChoices['TICKET_SEVERITY']">
+		                    <option value="{{severty[0]}}">{{severty[1]}}</option>
+		                  </ng-container>
+		                </select>
+		            </div>
+		          </div>
+
+		          <div class="form-row mt-3">
+		            <div class="col-md-6 col-12">
+		              <label for="status" class="input-label">Status</label><span class="required">*</span><br/>
+		              	<select class="w-100" name="status" ngModel required>
+		                  <ng-container *ngFor="let status of projectChoices['TICKET_STATUS']">
+		                    <option value="{{status[0]}}">{{status[1]}}</option>
+		                  </ng-container>
+		                </select>
+		            </div>
+							</div>
+
+
+		          <div class="form-row mt-3">
+		            <div class="col-md-4 col-12">
+		              <label for="due_date" class="input-label">Due date</label><br/>
+		            	<input type="date" name="due_date" ngModel />
+		            </div>
+							</div>
+		        </fieldset>
+				  </div>
+				  
+					<div class="modal-footer">
+		        <button type="submit" class="btn btn-primary">Add</button>
+					</div>
+		    </form>
+			</div>
+		</div>
+	</div>
+
+</div>

@@ -1,0 +1,75 @@
+#selectMembers li {
+	font-size: 14px;
+	padding: 5px;
+}
+
+#selectMembers li:hover {
+	background: rgba(0,0,0, 0.1);
+}
+
+
+:host>>>.ng2-smart-pagination-nav {
+	margin: auto !important;
+}
+
+
+.checkout-row {
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px;
+  margin-top: 20px;
+
+}
+
+.input-label {
+  margin-bottom: 0;
+}
+
+#checkout-container {
+  font-size: 14px;
+}
+
+.required {
+  color: red;
+}
+
+hr {
+  margin: 25px 0 25px 0;
+}
+
+#id_shipping_state, 
+#id_billing_state{
+  background-color: white;
+  height: 38px;
+  border-color: #CCCCCC;
+}
+
+a {
+   cursor:pointer;
+   color: blue;
+}
+
+a:hover{
+   text-decoration: underline;
+ }
+
+/*ERROR STYLES*/
+input.ng-dirty.ng-invalid { border: 2px solid #ff0000 }
+input.ng-dirty.ng-valid { border: 2px solid #6bc502 }
+
+
+#memberFormDiv {
+	border-left: 0.5px solid rgba(0, 0, 0, 0.1);
+}
+
+#tableDiv {
+	overflow: auto;
+}
+
+select {
+  padding: 8px;
+}
+
+select[disabled] {
+  color: black;
+  background-color: #e9ecef;
+}

@@ -1,0 +1,203 @@
+
+<div *ngIf="project != null">
+	<h3><b>{{project['title'] | titlecase }}</b></h3>
+	<select (change)="changeProjectStatus($event.target.value)" [(ngModel)]="projectStatus" class="btn-sm" 
+		[class.btn-success]="projectStatus != 'Cancelled'"
+		[class.btn-danger]="projectStatus == 'Cancelled'"
+		[disabled]="authorizedLevel != 'admin'">
+		<option value="{{projectStatus}}">{{projectStatus}}</option>
+		
+		<ng-container *ngIf="projectChoices">
+			<ng-container *ngFor="let choice of projectChoices['PROJECT_STATUSES']">
+				<ng-container *ngIf="choice[0] != projectStatus">
+					<option value="{{choice[0]}}">{{choice[1]}}</option>
+				</ng-container>
+			</ng-container>
+		</ng-container>
+	</select>
+
+	<a class="pull-right text-primary mr-2" data-toggle="collapse" data-target="#projectDescription" aria-controls="projectDescription" aria-expanded="false" aria-label="Toggle description">
+		Project Description
+		<i class="fa fa-caret-square-o-down ml-1" aria-hidden="true"></i>
+	</a>
+
+	<div id="projectDescription" class="card col-12 mt-4 collapse">
+	  <div class="card-body">
+	    <h6 class="card-title"><b>Project Description</b></h6>
+	    
+	    <form #projDescForm="ngForm" (submit)="saveProjDesc(projDescForm)">
+				<ckeditor name="descInput" ngModel
+				[editor]="Editor" 
+				[data]="editorData" 
+				[disabled]="authorizedLevel != 'admin'"
+				(focus)="editorFocused = true"
+				(blur)="editorBlurred()"
+				></ckeditor>
+				<hr/>
+				<button type="submit" *ngIf="editorFocused" class="btn btn-success">Submit</button>
+			</form>
+		</div>
+	</div>
+
+	<div class="row mt-2">
+		<div class="col-12 col-md-6">
+			<div class="card info-card">
+			  <h6 class="card-title">
+			   	<b>Due Work Items</b>
+			  </h6>
+				
+				<div *ngIf="dueWorkItems; else noWorkItems" class="card-body mt-1 mx-1" style="overflow: auto">
+			    <ul class="list-unstyled custom-list">
+		    		<ng-container *ngFor="let ticket of dueWorkItems['tickets']">
+			    		<li>
+			    			<a 
+			    			[class.text-danger]="ticket['severity'] == 'Critical' || ticket['severity'] == 'Show Stopper'" (click)="ticketDetails(ticket['id'])">
+			    				<i class="fa fa-ticket mr-2" title="Ticket"></i>
+
+			    				{{ticket['title']}}
+			    			</a>
+			    			
+			    			<div class="pull-right">
+				    			<label>{{todayDate | date: "dd /MMM /'y"}}</label>
+				    		</div>
+							</li>
+						</ng-container>
+			    </ul>
+			  </div>
+
+			  <ng-template #noWorkItems>
+					<div class="card-body text-center">
+						No Due Work Items!
+					</div>
+				</ng-template>
+			</div>
+		</div>
+		
+		<div class="col-12 col-md-6 mt-2 mt-md-0">
+			<div class="card info-card">
+			  <h6 class="card-title">
+			  	<b>Tickets</b>
+			   	<a routerLink="tickets">
+			   		<small class="pull-right mr-3 mt-1"><b>view all >></b></small>
+			   	</a>
+			  </h6>
+	
+				<div class="card-body" *ngIf="doughnutTypeData.length > 0; else noDoughnut">
+					<div class="pull-right">
+						<select class="chart-select" (change)="doughnutFilter = $event.target.value">
+							<option value="type">Type</option>
+							<option value="status">Status</option>
+						</select>	
+					</div>
+
+					<div>
+						<canvas *ngIf="doughnutFilter == 'type'" baseChart 
+					    [data]="doughnutTypeData"
+					    [labels]="doughnutTypeLabels"
+					    [chartType]="doughnutChartType"
+							[options]="doughnutChartOptions"
+					    style="margin: auto; margin-top: 50px">
+					  </canvas>
+
+					  <canvas *ngIf="doughnutFilter == 'status'" baseChart 
+					    [data]="doughnutStatusData"
+					    [labels]="doughnutStatusLabels"
+					    [chartType]="doughnutChartType"
+							[options]="doughnutChartOptions"
+					    style="margin: auto; margin-top: 50px">
+					  </canvas>
+					</div>
+				</div>
+
+				<ng-template #noDoughnut>
+					<div class="card-body text-center">
+						No Tickets Yet
+					</div>
+				</ng-template>
+			</div>
+		</div>
+	</div>
+	
+	<div class="row mt-2">
+		<div class="col-12 col-md-6">
+			<div class="card info-card">
+			  <h6 class="card-title">
+			   	<b>Milestones</b>
+			   	<a routerLink="milestones">
+			   		<small class="pull-right mr-3 mt-1"><b>view all >></b></small>
+			   	</a>
+			  </h6>
+				
+				<div class="card-body" *ngIf="milestoneChartData.length > 0; else noMilestones">
+					<div class="mb-3" style="display: block; max-width: 100%">
+						<canvas baseChart 
+					    [data]="milestoneChartData"
+					    [labels]="milestoneChartLabels"
+					    [chartType]="milestoneChartType"
+							[options]="milestoneChartOptions"
+							style="margin: auto">
+					  </canvas>
+					</div>
+
+					<table class="table">
+						<tr>
+							<th>Open</th>
+							<th>Completed</th>
+							<th>Total</th>
+						</tr>
+
+						<tr>
+							<td class="pull-center">
+								{{milestoneStatus["Open"]}}
+							</td>
+							<td class="pull-center">
+								{{milestoneStatus["Completed"]}}
+							</td>
+							<td class="pull-center">
+								{{milestoneStatus["Open"] + milestoneStatus["Completed"]}}
+							</td>
+						</tr>
+					</table>
+				</div>
+
+				<ng-template #noMilestones>
+					<div class="card-body text-center">
+						No Milestones Yet
+					</div>
+				</ng-template>
+			</div>
+		</div>
+
+		<div class="col-12 col-md-6 mt-2 mt-md-0">
+			<div class="card info-card">
+			  <h6 class="card-title">
+			   	<b>Project Members</b>
+			   	<a routerLink="members">
+			   		<small class="pull-right mr-3 mt-1"><b>view all >></b></small>
+			   	</a>
+			  </h6>
+				
+				<div *ngIf="project['member_set'].length > 0; else noMembers" class="card-body mt-1 mx-1" style="overflow: auto">
+			    <ul class="list-unstyled custom-list">
+		    		<ng-container *ngFor="let member of project['member_set']">
+			    		<li>
+			    			<i class="fa fa-user-o mr-2" title="Member"></i>
+									{{member['name']}}
+			    			
+			    			<div class="pull-right">
+				    			<label>{{member['role']}}</label>
+				    		</div>
+							</li>
+						</ng-container>
+			    </ul>
+			  </div>
+
+			  <ng-template #noMembers>
+					<div class="card-body text-center">
+						No Members In Project Yet!
+					</div>
+				</ng-template>
+			</div>
+		</div>
+	</div>
+</div>

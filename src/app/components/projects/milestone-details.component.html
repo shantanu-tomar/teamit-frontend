@@ -1,0 +1,195 @@
+<div *ngIf="project">
+	<h3>{{project['title']}} Milestones</h3>
+
+	<div class="row mt-3 mb-4">
+		<div class="col-12">
+			<label>Project Milestones:</label>
+			<div class="card" id="tableDiv">
+				<ng2-smart-table 
+					[settings]="settings" 
+					[source]="source" 
+					(edit)="milestoneSelected($event.data.id)" 
+					(create)="addMilestoneEvent()">
+				</ng2-smart-table>
+			</div>
+		</div>
+	</div>
+
+	<hr/>
+	
+	<div class="card container" id="milestoneDetailDiv" style="margin-top: 50px" >
+		<div *ngIf="selectedMilestone">
+			<div class="row">
+				<div class="col-12 mt-3">
+					<h4>Milestone Details</h4>
+					<small *ngIf="authorizedLevel != 'admin'" class="text-muted">
+						Since you are a non-admin member of this project, you won't be able to change some values.
+					</small>
+				</div>
+			</div>
+		
+			<div class="row">
+				<div class="col-md-8 mb-4" id="milestoneUpdateFormCol">
+					<form id="milestoneUpdateForm" #milestoneUpdateForm='ngForm' ngNativeValidate class="card-body form" (submit)="milestoneUpdate(milestoneUpdateForm)" >
+		      	<fieldset [disabled]="authorizedLevel != 'admin'">
+		          <div class="form-row mt-3">
+		          	<div class="col-12">
+		          		<label for="milestone" class="input-label">Milestone</label><span class="required">*</span>
+			            <input type='text' name='milestone' class='form-control' minlength="2" [(ngModel)]="selectedMilestone['milestone']" maxlength="25" style="font-weight: bold" />
+		          	</div>
+		          </div>
+
+		          <div class="form-row mt-3">
+		            <label for="description" class="input-label">Description</label><br/>
+		            <textarea name='description' class='form-control' [(ngModel)]="selectedMilestone['description']"></textarea>
+		          </div>
+		          
+		          <div class="form-row mt-3">
+		            <div class="col-md-6 col-12">
+		              <label for="responsible" class="input-label">Member responsible (optional)</label><br/>
+		              
+		                <select class="w-100" name="responsible" [(ngModel)]="milestoneResponsible">
+		                  <ng-container *ngFor="let member of project['member_set']">
+		                    <option value="{{member['id']}}">{{member['name']}}-{{member['id']}}</option>
+		                  </ng-container>
+		                </select>
+		              
+								</div>
+		          </div>
+
+		          <div class="form-row mt-3">
+		            <div class="col-md-4 col-12">
+		              <label for="start_date" class="input-label">Start date</label><span class="required">*</span><br/>
+		            	<input type="date" name="start_date" required [(ngModel)]="selectedMilestone['start_date']" />
+		            </div>
+
+		            <div class="col-md-4 col-12">
+		              <label for="due_date" class="input-label">Due date</label><span class="required">*</span><br/>
+		            	<input type="date" name="due_date" [(ngModel)]="selectedMilestone['due_date']" required />
+		            </div>
+							</div>
+
+							<div class="form-row mt-3">
+								<div class="col-md-6 col-12">
+		            	<input type="checkbox" class="custom-form-input" name="completed" ngModel [(ngModel)]="selectedMilestone['completed']" />
+		              <label for="completed" class="input-label ml-2">Milestone achieved ?</label>
+		            </div>
+
+		            <div *ngIf="selectedMilestone['completed']" class="col-md-6 col-12">
+		              <label for="completed_on" class="input-label">Completed on</label><br/>
+		            	<input type="date" name="completed_on" [(ngModel)]="selectedMilestone['completed_on']" />
+		            </div>
+		          </div>
+		        </fieldset>
+						<hr/>
+		        <button type="submit" class="btn btn-primary" *ngIf="authorizedLevel == 'admin'">Update</button>
+		        <button type="button" class="btn btn-danger ml-1" *ngIf="authorizedLevel == 'admin'" (click)="deleteMilestone(selectedMilestone['id'])">Delete</button>
+		      </form>
+				</div>
+
+				<div class="col-md-4 col-12">
+					<h5>Comments</h5>
+					
+					<div id="commentsDiv">
+						<ng-container *ngFor="let comment of selectedMilestoneComments">
+							<div class="chat-container" [class.darker]="comment['commenter']['id'] == userId">
+								<p>
+									<b>{{comment['commenter']['name']}}</b>&nbsp;
+									<span class="text-muted commenter-role">({{comment['commenter']['role'] | lowercase }})</span><br/>
+									{{comment['comment']}}
+								</p>
+								<small class="text-muted chat-time">{{comment['created'] | date}}</small>
+							</div>
+						</ng-container>
+					</div>
+
+					<div class="comment-input-div mt-3">
+						<form #milestoneCommentForm="ngForm" (submit)="milestoneComment(milestoneCommentForm)" ngNativeValidate >
+							<input type="text" name="milestoneID" style="display: none" ngModel="{{selectedMilestone['id']}}" />
+							<textarea name="comment" class="chatbox-input" placeholder="write a comment" ngModel required></textarea>
+							<div class="pull-right">
+								<button type="submit" class="ml-1 btn-sm btn" style="background-color: #E4E7EC">
+									<i class="fa fa-paper-plane mr-1" aria-hidden="true"></i>
+									Send
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- ADD MILESTONE MODAL -->
+	<div class="modal fade" id="addMilestoneModal" tabindex="-1" role="dialog" aria-labelledby="addMilestoneModalTitle" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+			  <div class="modal-header">
+					<h5 class="modal-title" id="addMilestoneModalTitle">Add Milestone To This Project</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					  <span aria-hidden="true">&times;</span>
+					</button>
+			  </div>
+				
+				<form #addMilestoneForm='ngForm' ngNativeValidate class="card-body form" (ngSubmit)="addMilestone(addMilestoneForm)" >
+			  	<div class="modal-body">
+		      	<fieldset [disabled]="authorizedLevel != 'admin'">
+		      		<div class="form-row">
+		            <div class="col-12">
+			            <label for="milestone" class="input-label">Milestone</label><span class="required">*</span><br/>
+			            <input type='text' name='milestone' class='form-control' required ngModel maxlength="25" />
+			          </div>
+		          </div>
+
+		          <div class="form-row mt-3">
+		            <label for="description" class="input-label">Description</label><br/>
+		            <textarea name='description' class='form-control' ngModel></textarea>
+		          </div>
+		          
+		          <div class="form-row mt-3">
+		            <div class="col-12">
+		              <label for="responsible" class="input-label">Member responsible (optional)</label><br/>
+		              <select class="w-100 form-control" name="responsible" ngModel>
+	                  <ng-container *ngFor="let member of project['member_set']">
+	                    <option value="{{member['id']}}">{{member['name']}}-{{member['id']}}</option>
+	                  </ng-container>
+	                </select>
+		            </div>
+							</div>
+
+							<div class="form-row mt-3">
+		            <div class="col-6">
+		              <label for="start_date" class="input-label">Start date</label><span class="required">*</span><br/>
+		            	<input type="date" name="start_date" required ngModel />
+		            </div>
+
+		            <div class="col-6">
+		              <label for="due_date" class="input-label">Due date</label><span class="required">*</span><br/>
+		            	<input type="date" name="due_date" ngModel required />
+		            </div>
+							</div>
+
+							<div class="form-row mt-3">
+								<div class="col-6">
+		            	<input type="checkbox" class="custom-form-input" name="completed" ngModel />
+		              <label for="completed" class="input-label ml-2">Milestone achieved ?</label>
+		            </div>
+
+		            <div class="col-6">
+		              <label for="completed_on" class="input-label">Completed on</label><br/>
+		            	<input type="date" name="completed_on" ngModel />
+		            </div>
+							</div>
+		        </fieldset>
+				  </div>
+				  
+					<div class="modal-footer">
+		        <button type="submit" class="btn btn-primary">Add</button>
+					</div>
+		    </form>
+			</div>
+		</div>
+	</div>
+
+</div>

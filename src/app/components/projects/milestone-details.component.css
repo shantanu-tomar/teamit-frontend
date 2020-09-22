@@ -1,0 +1,83 @@
+@media screen and (min-width: 769px) {
+	#milestoneUpdateFormCol {
+		border-right: 0.5px solid rgba(0,0,0,0.3);
+	}
+}
+
+form label {
+	color: gray;
+  font-size: 0.9rem;
+}
+
+
+/* COMMENTS BOX */
+
+#commentsDiv {
+	max-height: 400px;
+	overflow-y: auto; 
+}
+
+.chat-container {
+  border: 2px solid #dedede;
+  background-color: rgba(206, 255, 69, 0.5);
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px 0;
+  position: relative;
+  font-size: 14px;
+}
+
+/* Darker chat container */
+.darker {
+  border-color: #ccc;
+  background-color: rgba(206, 255, 69, 0.8);
+}
+
+/* Clear floats */
+.chat-container::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+/* Style images */
+.chat-container img {
+  float: left;
+  max-width: 25px;
+  width: 100%;
+  margin-right: 20px;
+  border-radius: 50%;
+}
+
+/* Style the right image */
+.chat-container img.right {
+  float: right;
+  margin-left: 20px;
+  margin-right:0;
+}
+
+/* Style time text */
+.chat-time {
+	position: absolute;
+	bottom: 2px;
+	right: 5px;
+}
+
+.commenter-role {
+	font-size: 12px;
+}
+
+.chatbox-input {
+	height: 50px !important;
+	width: 100%;
+	padding: 10px;
+}
+
+select {
+  padding: 8px;
+}
+
+select[disabled] {
+  color: black;
+  background-color: #e9ecef;
+}

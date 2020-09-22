@@ -1,0 +1,51 @@
+.card {
+	box-shadow: 2px 2px 1px #888888;
+}
+
+.card:hover {
+	box-shadow: 3px 3px 1px #888888;
+}
+
+.card-body_list {
+	overflow: auto;
+}
+
+.card-footer {
+	position: absolute;
+	right: 0px;
+	bottom: 10px;
+}
+
+.custom-list li {
+	font-size: 14px;
+	padding: 5px;
+	border-bottom: 0.5px solid gray;
+}
+
+.custom-list li:hover {
+	background: rgba(0,0,0, 0.1);
+}
+
+.info-card {
+	height: 350px;
+	padding-bottom: 10px
+}
+
+.info-card-sm {
+	height: 200px;
+	padding-bottom: 10px
+}
+
+.card-title {
+	padding: 10px 0px 0px 10px;
+}
+
+.card-subtitle {
+	padding: 0px 0px 0px 10px;
+}
+
+.chart-select {
+	padding: 3px;
+	font-size: 14px;
+	cursor: pointer;
+}

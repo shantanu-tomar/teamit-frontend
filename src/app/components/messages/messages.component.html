@@ -1,0 +1,277 @@
+<div class="container">
+	<div class="messaging">
+    <div class="inbox_msg">
+      <div class="inbox_people col-md-4 col-12 p-0">
+        <div class="headind_srch">
+          <div class="recent_heading">
+            <h4>Messages</h4>
+          </div>
+          
+        </div>
+
+        <div class="inbox_chat">
+          <ng-container *ngFor="let chat of projectChatGroups">
+            <div class="chat_list" [class.active_chat]="chat == selectedChat" (click)="selectChat(chat)">
+              <div class="chat_people">
+                <div class="chat_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
+                <div class="chat_ib">
+                  <h5>{{chat['name']}} <span class="chat_date" *ngIf="chat['message_set'].length > 0">{{ getLastChatMsg(chat)['created'] | date }}</span></h5>
+                  <p *ngIf="chat['message_set'].length > 0">
+                    {{ getLastChatMsg(chat)['text'] | slice:0:20 }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-container *ngFor="let chat of userChatGroups">
+            <div class="chat_list" [class.active_chat]="chat == selectedChat" (click)="selectChat(chat)">
+              <div class="chat_people">
+                <div class="chat_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
+                <div class="chat_ib">
+                  <h5>{{chat['name']}} <span class="chat_date" *ngIf="chat['message_set'].length > 0">{{ getLastChatMsg(chat)['created'] | date }}</span></h5>
+                  <p *ngIf="chat['message_set'].length > 0">
+                    {{ getLastChatMsg(chat)['text'] | slice:0:20 }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <ng-container *ngIf="desktopScreen">
+        <div id="chatHistoryDiv" *ngIf="selectedChat; else noChatSelected" class="mesgs col-md-8 col-12 p-0">
+          <div class="msg_history">
+            <div class="card-header msg_head">
+              <div class="d-flex bd-highlight">
+                <div class="img_cont">
+                  <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">
+                  <span class="online_icon"></span>
+                </div>
+                <div class="user_info">
+                  <span>{{selectedChat['name']}}</span>
+                </div>
+                <div class="video_cam">
+                  <a><i class="fa fa-video-camera" (click)="goToVideoChatRoom({'audio':true, 'video':true})"></i></a>
+                  <a><i class="fa fa-phone" (click)="goToVideoChatRoom({'audio':true, 'video':false})"></i></a>
+                </div>
+              </div>
+
+              <div class="action_div">
+                <span id="action_menu_btn"><i class="fa fa-ellipsis-v"></i></span>
+                <div class="action_menu">
+                  <ul>
+                    <li><i class="fa fa-user-circle"></i> View profile</li>
+                    <li><i class="fa fa-users"></i> Add to close friends</li>
+                    <li><i class="fa fa-plus"></i> Add to group</li>
+                    <li><i class="fa fa-ban"></i> Block</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div id="messagesDiv">
+            	<ng-container *ngFor="let msg of selectedChat['message_set']">
+    	          <div *ngIf="msg['sender']['id'] != user['id']" class="incoming_msg col-8 pull-left">
+    	            <div class="received_msg">
+                    <div class="sender-name-div">
+                      <span class="sender-name">{{msg['sender']['name']}}</span>
+                    </div>
+
+                    <div *ngIf="msg['file_type']=='application'" class="non-image-msg " style="background-color: rgba(0, 0, 0, 0.2)">
+                      <a href="{{msg['file']}}" target="_blank">
+                        <div class="row text-dark">
+                          <div class="col-2 attach-download-icon text-center">
+                            <i class="fa fa-file-text-o text-warning" aria-hidden="true"></i>
+                          </div>
+
+                          <div class="col-10">
+                            {{msg['filename']}}
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+
+                    <div *ngIf="msg['file_type']=='audio'" class="non-image-msg " style="background-color: rgba(0, 0, 0, 0.2)">
+                      <a href="{{msg['file']}}" target="_blank">
+                        <div class="row text-dark">
+                          <div class="col-2 attach-download-icon text-center">
+                            <i class="fa fa-file-audio-o text-primary" aria-hidden="true"></i>
+                          </div>
+
+                          <div class="col-10">
+                            {{msg['filename']}}
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+
+                    <div *ngIf="msg['file_type']=='video'" class="non-image-msg " style="background-color: rgba(0, 0, 0, 0.2)">
+                      <a href="{{msg['file']}}" target="_blank">
+                        <div class="row text-dark">
+                          <div class="col-2 attach-download-icon text-center">
+                            <i class="fa fa-file-video-o text-danger" aria-hidden="true"></i>
+                          </div>
+
+                          <div class="col-10">
+                            {{msg['filename']}}
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+                    
+                    <div *ngIf="msg['file_type']=='image'" class="image-msg" style="background-color: rgba(0, 0, 0, 0.2)">
+                      <a href="{{msg['file']}}" target="_blank">
+                        <img src="{{msg['file']}}" />
+                      </a>
+                    </div>
+                    
+                    <p>{{msg['text']}}</p><br/>
+  	                <small class="time_date text-dark mt-2"> {{msg['created'] | date: 'd/LLL/yy - h:mm aaa' }}</small>
+    	            </div>
+    	          </div>
+
+    	          <div *ngIf="msg['sender']['id'] == user['id']" class="outgoing_msg col-8 pull-right">
+    	            <div class="sent_msg">
+                    <div *ngIf="msg['file_type']=='application'" class="non-image-msg bg-info">
+                      <a href="{{msg['file']}}" target="_blank">
+                        <div class="row text-light">
+                          <div class="col-2 attach-download-icon text-center">
+                            <i class="fa fa-file-text-o text-warning" aria-hidden="true"></i>
+                          </div>
+
+                          <div class="col-10">
+                            {{msg['filename']}}
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+
+                    <div *ngIf="msg['file_type']=='audio'" class="non-image-msg bg-info">
+                      <a href="{{msg['file']}}" target="_blank">
+                        <div class="row text-light">
+                          <div class="col-2 attach-download-icon text-center">
+                            <i class="fa fa-file-audio-o text-primary" aria-hidden="true"></i>
+                          </div>
+
+                          <div class="col-10">
+                            {{msg['filename']}}
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+
+                    <div *ngIf="msg['file_type']=='video'" class="non-image-msg bg-info">
+                      <a href="{{msg['file']}}" target="_blank">
+                        <div class="row text-light">
+                          <div class="col-2 attach-download-icon text-center">
+                            <i class="fa fa-file-video-o text-danger" aria-hidden="true"></i>
+                          </div>
+
+                          <div class="col-10">
+                            {{msg['filename']}}
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+                    
+                    <div *ngIf="msg['file_type']=='image'" class="image-msg bg-info">
+                      <a href="{{msg['file']}}" target="_blank">
+                        <img src="{{msg['file']}}" />
+                      </a>
+                    </div>
+                    
+    	              <p>
+                      {{msg['text']}}
+                    </p>
+                    <br/>
+    	              <span class="time_date text-light mt-2"> 
+                      <small>{{msg['created'] | date: 'd/LLL/yy - h:mm aaa' }}</small>
+                      
+                      <span class="ml-2">
+                        <i *ngIf="msg['status'] == undefined || msg['status'] == 'S'" class="fa fa-check-circle-o" aria-hidden="true" title="Sent"></i>
+                        <i *ngIf="msg['status'] == 'D'" class="fa fa-check-circle" aria-hidden="true" title="Delivered"></i>
+                        <i *ngIf="msg['status'] == 'R'" class="fa fa-check-circle text-success" aria-hidden="true" title="Read"></i>
+                        <i *ngIf="msg['status'] == 'F'" class="fa fa-times-circle text-danger" aria-hidden="true" title="Failed"></i>
+                      </span>
+                    </span> 
+                  </div>
+    	          </div>
+    	        </ng-container>
+            </div>
+          </div>
+
+
+          <div id="msgWriteDiv" class="card-footer">
+            <form enctype="multipart/form-data" [formGroup]="form" (submit)="sendMessage()">
+              <div class="input-group" id="roundedForm">
+                <div class="input-group-append" style="border-right:">
+                  <input id="docAttach" type="file" name="doc_attach" accept=".xlsx, .xls, .csv, .pdf" (change)="fileUpload($event)" class="clearablefileinput" hidden />
+                  
+                  <input id="audioAttach" type="file" name="audio_attach" accept="audio/*" (change)="fileUpload($event)" class="clearablefileinput" hidden />
+                  
+                  <input id="imageAttach" type="file" name="image_attach" accept="image/*" (change)="fileUpload($event)" class="clearablefileinput" hidden />
+                  
+                  <input id="videoAttach" type="file" name="video_attach" accept="video/*" (change)="fileUpload($event)" class="clearablefileinput" hidden />
+                  
+                  <span class="input-group-text attach_btn" data-toggle="modal" data-target="#fileTypePickerModal"><i class="fa fa-paperclip"></i></span>
+                </div>
+                
+                <textarea name="text" class="form-control type_msg" placeholder="Type your message..." required [formControl]='writeMessage'></textarea>
+                
+                <div class="input-group-append">
+                  <button type="submit" class="input-group-text send_btn"><i class="fa fa-location-arrow"></i></button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <ng-template #noChatSelected>
+          <div class="mesgs col-md-8 p-0">
+            <div class="container text-center">
+              <i id="noChatIcon" class="fa fa-comments text-primary" aria-hidden="true"></i><br/>
+
+              <h5 class="text-muted">Select a chat...</h5>
+            </div>
+          </div>
+        </ng-template>
+      </ng-container>
+    </div>
+  </div>
+</div>
+
+<!-- File Type Picker MODAL -->
+<div class="modal fade" id="fileTypePickerModal" tabindex="-1" role="dialog" aria-labelledby="fileTypePickerModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="container">
+          <div class="row">
+            <span class="col-6 col-md-4 text-center mb-3" (click)="docAttachBtn()">
+              <i class="fa fa-file file-type-icon text-warning" aria-hidden="true"></i><br/>
+              <small>Document</small><br/>
+            </span>
+
+            <span class="col-6 col-md-4 text-center mb-3" (click)="audioAttachBtn()">
+              <i class="fa fa-music file-type-icon text-primary" aria-hidden="true"></i><br/>
+              <small>Audio</small>
+            </span>
+
+            <span class="col-6 col-md-4 text-center mb-3" (click)="imageAttachBtn()">
+              <i class="fa fa-picture-o file-type-icon text-success" aria-hidden="true"></i><br/>
+              <small>Image</small>
+            </span>
+
+          
+            <span class="col-6 col-md-12 text-center" (click)="videoAttachBtn()">
+              <i class="fa fa-video-camera file-type-icon text-danger" aria-hidden="true"></i><br/>
+              <small>Video</small>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,7 @@
+a {
+	cursor: pointer;
+}
+
+:host>>>.ng2-smart-pagination-nav {
+	margin: auto !important;
+}

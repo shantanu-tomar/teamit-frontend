@@ -1,0 +1,92 @@
+<div *ngIf="chat" class="mesgs col-12 p-0">
+  <div class="msg_history">
+    <div class="card-header msg_head">
+      <div class="d-flex bd-highlight">
+        <div class="img_cont">
+          <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">
+          <span class="online_icon"></span>
+        </div>
+        <div class="user_info">
+          <span>{{chat['name']}}</span>
+        </div>
+        <div class="video_cam">
+          <a><i class="fa fa-video-camera" (click)="goToVideoChatRoom({'audio':true, 'video':true})"></i></a>
+          <a><i class="fa fa-phone" (click)="goToVideoChatRoom({'audio':true, 'video':false})"></i></a>
+        </div>
+      </div>
+
+      <div class="action_div">
+        <span id="action_menu_btn"><i class="fa fa-ellipsis-v"></i></span>
+        <div class="action_menu">
+          <ul>
+            <li><i class="fa fa-user-circle"></i> View profile</li>
+            <li><i class="fa fa-users"></i> Add to close friends</li>
+            <li><i class="fa fa-plus"></i> Add to group</li>
+            <li><i class="fa fa-ban"></i> Block</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div id="messagesDiv">
+    	<ng-container *ngFor="let msg of chat['message_set']">
+        <div *ngIf="msg['sender']['id'] != user['id']" class="incoming_msg col-8 pull-left">
+          <div class="received_msg">
+            <ng-container *ngIf="msg['file']">
+              <img src="{{msg['file']}}" />
+            </ng-container>
+            <p>{{msg['text']}}</p><br/>
+            <small class="time_date text-dark mt-2"> {{msg['created'] | date: 'd/LLL/yy - h:mm aaa' }}</small>
+          </div>
+        </div>
+
+        <div *ngIf="msg['sender']['id'] == user['id']" class="outgoing_msg col-8 pull-right">
+          <div class="sent_msg">
+            <ng-container *ngIf="msg['file']">
+              <img src="{{msg['file']}}" />
+            </ng-container>
+            <p>
+              {{msg['text']}}
+            </p>
+            <br/>
+            <span class="time_date text-light mt-2"> 
+              <small>{{msg['created'] | date: 'd/LLL/yy - h:mm aaa' }}</small>
+              
+              <span class="ml-2">
+                <i *ngIf="msg['status'] == undefined" class="fa fa-check-circle-o" aria-hidden="true" title="Sent"></i>
+                <i *ngIf="msg['status'] == 'D'" class="fa fa-check-circle" aria-hidden="true" title="Delivered"></i>
+                <i *ngIf="msg['status'] == 'R'" class="fa fa-check-circle text-success" aria-hidden="true" title="Read"></i>
+                <i *ngIf="msg['status'] == 'F'" class="fa fa-times-circle text-danger" aria-hidden="true" title="Failed"></i>
+              </span>
+            </span> 
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+
+  <div id="msgWriteDiv" class="card-footer">
+    <form enctype="multipart/form-data" [formGroup]="form" (submit)="sendMessage()">
+      <div class="input-group" id="roundedForm">
+        <div class="input-group-append" style="border-right:">
+          <input id="docAttach" type="file" name="doc_attach" accept=".xlsx, .xls, .csv, .pdf" (change)="fileUpload($event)" class="clearablefileinput" hidden />
+          
+          <input id="audioAttach" type="file" name="audio_attach" accept="audio/*" (change)="fileUpload($event)" class="clearablefileinput" hidden />
+          
+          <input id="imageAttach" type="file" name="image_attach" accept="image/*" (change)="fileUpload($event)" class="clearablefileinput" hidden />
+          
+          <input id="videoAttach" type="file" name="video_attach" accept="video/*" (change)="fileUpload($event)" class="clearablefileinput" hidden />
+          
+          <span class="input-group-text attach_btn" data-toggle="modal" data-target="#fileTypePickerModal"><i class="fa fa-paperclip"></i></span>
+        </div>
+        
+        <textarea name="text" class="form-control type_msg" placeholder="Type your message..." required [formControl]='writeMessage'></textarea>
+        
+        <div class="input-group-append">
+          <button type="submit" class="input-group-text send_btn"><i class="fa fa-location-arrow"></i></button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

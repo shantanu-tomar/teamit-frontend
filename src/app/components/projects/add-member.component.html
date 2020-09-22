@@ -1,0 +1,60 @@
+<div *ngIf="status == 'verifying'">
+	<h4>Verifying token...</h4>
+</div>
+
+<div>
+	<div class="card col-md-8 col-12" *ngIf="status == 'approved'" style="margin: auto">
+		<div class="row container">
+			<div class="mt-3">
+				<h4>Enter Member Details</h4>
+				<h6 *ngIf="!user" class="text-muted">We see that you haven't signed up on TeamIt. Let's set up your user and member accounts in one go.</h6>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-12 mb-4">
+				<form #addMemberForm='ngForm' ngNativeValidate class="card-body form" (submit)="addMember(addMemberForm)" >
+	      	<fieldset>
+	          <div class="form-row mt-3">
+	          	<div class="col-12">
+	          		<label for="name" class="input-label">Name</label><span class="required text-danger">*</span>
+		            
+		            <input *ngIf="user" type='text' name='name' class='form-control' minlength="2" required [(ngModel)]="user['name']" disabled />
+		            
+		            <input *ngIf="!user" type='text' name='name' class='form-control' minlength="2" required ngModel />
+	          	</div>
+	          </div>
+
+	          <div class="form-row mt-3">
+	            <label for="email" class="input-label">Email Address</label><span class="required text-danger">*</span><br/>
+	            <input type='email' id='email' name='email' class='form-control' required  [(ngModel)]="email" disabled />
+	          </div>
+	          
+	          <div *ngIf="!user" class="form-row mt-3">
+	            <label for="password" class="input-label">User Password</label><span class="required text-danger">*</span><br/>
+	            <input type='password' id='password' name='password' class='form-control' required  ngModel />
+
+	            <small class="text-muted">Set up a password for signing up.</small>
+	          </div>
+	          
+	          <div class="form-row mt-3">
+	            <div class="col-md-6 col-12">
+	              <label for="role" class="input-label">Role</label><span class="required text-danger">*</span><br/>
+	              <span style="height:10px">
+	            		<input type='text' id='role' name='role' class='form-control' required [(ngModel)]="role" disabled />
+	              </span>
+							</div>
+	          
+	            <div class="col-md-6 col-12 mt-3 mt-md-0">
+	              <label for="contact_number" class="input-label">Mobile No.</label>
+	              <input type='text' name='contact_number' class='form-control' pattern="^[0-9]+$" ngModel/>
+	            </div>
+	          </div>
+	        </fieldset>
+					<hr/>
+	        <button class="btn btn-primary">Submit</button>
+	      </form>
+			</div>
+		</div>
+	</div>
+</div>

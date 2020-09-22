@@ -1,0 +1,13 @@
+<div *ngIf="roomType == 'PC'; else groupChat">
+	<div class="col-6">
+		<video autoplay="true" id="myVideo"></video>
+	</div>
+
+	<div class="col-6">
+		<video autoplay="true" id="partnerVideo"></video>
+	</div>
+</div>
+
+<ng-template #groupChat>
+	<div id="videos" class="row"></div>
+</ng-template>

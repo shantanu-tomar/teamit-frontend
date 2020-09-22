@@ -1,0 +1,139 @@
+<div>
+	<h3>Project Members</h3>
+
+	<div class="row mt-3 mb-4">
+		<div class="col-12">
+			<label>Members and their assigned roles:</label>
+			<div class="card" id="tableDiv">
+				<ng2-smart-table 
+					[settings]="settings" 
+					[source]="source" 
+					(edit)="memberDetails($event)" 
+					(create)="addMemberEvent()">
+				</ng2-smart-table>
+			</div>
+		</div>
+	</div>
+	<hr/>
+	
+	<div class="card container" id="memberDetailDiv" style="margin-top: 50px" >
+		<div *ngIf="selectedMember">
+			<div class="row mb-2">
+				<div class="col-12 mt-3">
+					<h4>Member Details</h4>
+				</div>
+			</div>
+		
+			<div class="row">
+				<div class="col-12 col-md-4">
+					<div class="row">
+						<img src="static/images/me.jpg" class="col-6 offset-3">
+					</div>
+					
+					<div class="row mt-3">
+						<div class="col-12 text-center">
+							<h5>{{selectedMember['name']}}</h5>
+							<small>ID:  
+								<b>{{selectedMember['id']}}</b>
+							</small>
+							<br/>
+							<small>Joined:  
+								<b>{{selectedMember['created'] | date: "dd /MMM /'y" }}</b>
+							</small>
+							<br/>
+							
+							<button *ngIf="authorizedLevel == 'admin'" 
+							class="btn btn-danger col-8 mt-1">Delete Member</button>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-md-8 mb-4 mt-md-0 mt-3">
+					<form #memberUpdateForm='ngForm' ngNativeValidate class="card-body form" (submit)="memberUpdate(memberUpdateForm)" >
+						<small *ngIf="authorizedLevel != 'admin'" class="text-muted">
+							Since you are a non-admin member of this project, you won't be able to change some values.
+						</small>
+					
+		      	<fieldset>
+		          <div class="form-row mt-3">
+		          	<div class="col-12">
+		          		<label for="name" class="input-label">Name</label><span class="required">*</span>
+			            <input type='text' name='name' class='form-control' minlength="2" [(ngModel)]="selectedMember['name']" [disabled]="authorizedLevel != 'admin'"/>
+		          	</div>
+		          </div>
+
+		          <div class="form-row mt-3">
+		            <label for="email" class="input-label">Email Address</label><span class="required">*</span><br/>
+		            <input type='email' id='email' name='email' class='form-control' required  [(ngModel)]="selectedMember['email']" [disabled]="authorizedLevel != 'admin'"/>
+		          </div>
+		          
+		          <div class="form-row mt-3">
+		            <div class="col-md-6 col-12">
+		              <label for="role" class="input-label">Role</label><span class="required">*</span><br/>
+		              <span style="height:10px">
+		                <select class="w-100" name="role" required  [(ngModel)]="selectedMember['role']" [disabled]="authorizedLevel != 'admin'">
+		                  <ng-container *ngFor="let member_role of roles">
+		                    <option value="{{member_role[0]}}">{{member_role[1]}}</option>
+		                  </ng-container>
+		                </select>
+		              </span>
+								</div>
+		          
+		            <div class="col-md-6 col-12 mt-3 mt-md-0">
+		              <label for="contact_number" class="input-label">Mobile No.</label>
+		              <input type='text' name='contact_number' class='form-control' pattern="^[0-9]+$" [(ngModel)]="selectedMember['contact_number']" [disabled]="selectedMember['user'] != user['id'] && authorizedLevel != 'admin'"/>
+		            </div>
+		          </div>
+		        </fieldset>
+						<hr/>
+		        <button class="btn btn-primary" *ngIf="selectedMember['user'] == user['id'] || authorizedLevel == 'admin'">Update</button>
+		      </form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- INVITE MEMBER MODAL -->
+	<div class="modal fade" id="addMemberModal" tabindex="-1" role="dialog" aria-labelledby="addMemberModalTitle" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+			  <div class="modal-header">
+					<h5 class="modal-title" id="addMemberModalTitle">Invite Member To This Project</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					  <span aria-hidden="true">&times;</span>
+					</button>
+			  </div>
+				
+				<form #addMemberForm='ngForm' ngNativeValidate class="card-body form" (ngSubmit)="addMember(addMemberForm)" >
+			  	<div class="modal-body">
+		      	<fieldset [disabled]="authorizedLevel != 'admin'">
+		          <div class="form-row">
+		            <div class="col-12">
+			            <label for="email" class="input-label">Email Address</label><span class="required">*</span><br/>
+			            <input type='email' id='email' name='email' class='form-control' required ngModel/>
+			          </div>
+		          </div>
+		          
+		          <div class="form-row mt-3">
+		            <div class="col-12">
+		              <label for="role" class="input-label">Role</label><span class="required">*</span><br/>
+		              <span style="height:10px">
+		                <select class="w-100 form-control" name="role" required ngModel>
+		                  <ng-container *ngFor="let member_role of roles">
+		                    <option value="{{member_role[0]}}">{{member_role[1]}}</option>
+		                  </ng-container>
+		                </select>
+		              </span>
+								</div>
+							</div>
+		        </fieldset>
+				  </div>
+				  
+					<div class="modal-footer">
+		        <button type="submit" class="btn btn-primary">Invite</button>
+					</div>
+		    </form>
+			</div>
+		</div>
+	</div>
+</div>

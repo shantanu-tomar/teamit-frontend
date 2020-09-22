@@ -1,0 +1,64 @@
+<div id="profile-container" class="container" style="min-height: 100vh">
+	<div class="card col-lg-6 col-12" style="margin:auto">
+		<div class="media col-12 mt-3" style="margin:auto">
+			<a href="{{profileImg}}">
+				<img style="width:70px; height:70px; margin-right:15px" class="rounded-circle account-img" src="{{ profileImg }}">
+			</a>
+			<div class="media-body">
+				<h4 class="account-heading">
+					<span *ngIf="userName.value; else noName">
+						{{ userName.value }}
+					</span>
+					<ng-template #noName >
+						User
+					</ng-template>
+				</h4>
+				<p class="text-secondary">
+					{{userEmail.value}}
+				</p>
+			</div>
+		</div>
+
+		<div class="col-12" style="margin:auto">
+			<!-- add multipart/form-data to save the image to database -->
+			<form style="margin-top:30px; " enctype="multipart/form-data" [formGroup]="form" (submit)="updateProfile()">
+				<fieldset class="form-group">
+					<h5 class="border-bottom mb-4">
+						Profile Info
+					</h5>
+					
+
+					<div id="div_id_name" class="form-group">
+						<label for="id_name" class="">
+	            Name
+	          </label>
+	    
+	          <input type="text" maxlength="50" name="name" class="form-control" id="id_name" [formControl]='userName' value="{{userName.value}}"/>
+	          
+	        </div>
+
+	        <div id="div_id_email" class="form-group">
+	        	<label for="id_email" class=" requiredField">
+	            Email
+	            <span class="asteriskField">*</span>
+	          </label>
+
+	          <input type="email" name="email" [formControl]='userEmail' value="{{userEmail.value}}" class="emailinput form-control" required id="id_email">
+	        </div>
+
+					<div id="div_id_image" class="form-group">
+						<label for="id_image" class=" requiredField">
+	            Change profile photo
+	          </label>
+
+	          <input type="file" name="imageSelect" accept="image/*" class="clearablefileinput form-control" id="id_image" (change)="fileUpload($event)" />
+					</div>
+
+				</fieldset>
+				<div class="form-group">
+					<button class="btn btn-outline-success" type="submit">Update</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
