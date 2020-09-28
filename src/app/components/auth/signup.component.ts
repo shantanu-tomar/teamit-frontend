@@ -13,6 +13,7 @@ import {Title} from "@angular/platform-browser";
 
 })
 export class SignupComponent implements OnInit {
+  public name: string;
   public email: string;
   public password1: string;
   public password2: string;
@@ -34,9 +35,14 @@ export class SignupComponent implements OnInit {
   }
 
   signup(form: NgForm) {
+    if (form.value["password1"] != form.value["password2"]) {
+      this.shared.setMsg('danger', "The two password fields must match!", null);
+    }
+
     if (form.valid) {
       // perform authentication
       let data = {
+        "name": form.value["name"],
         "email": form.value["email"],
         "password1": form.value["password1"],
         "password2": form.value["password2"]
@@ -46,7 +52,7 @@ export class SignupComponent implements OnInit {
 
         response => {
           if (response) {
-            sessionStorage.setItem("userToken", response.token);
+            sessionStorage.setItem("userToken", JSON.stringify(response.token));
             sessionStorage.setItem("user", JSON.stringify(response.user));
             this.router.navigate(['/']);
             // this.shared.refreshAppComponent();
@@ -57,6 +63,9 @@ export class SignupComponent implements OnInit {
           
           if (error.error.email){
             this.shared.setMsg('danger', error.error.email, null);
+          }
+          else if (error.error.name){
+            this.shared.setMsg('danger', error.error.name, null);
           }
           else{
             this.shared.setMsg('danger', `Error ${error.status}: ${error.statusText}`, null)

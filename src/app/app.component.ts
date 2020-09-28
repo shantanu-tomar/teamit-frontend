@@ -1,10 +1,11 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Observable, Observer, fromEvent, merge, EMPTY, Subject } from 'rxjs';
 import { Router } from '@angular/router';
+import { NgForm } from '@angular/forms';
 import { map } from 'rxjs/operators';
 import { WebSocketService } from 'src/app/services/web-socket-service.service';
 import { AuthService } from 'src/app/services/auth.service';
-
+import { ApiService } from 'src/app/services/api.service';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { environment } from '../environments/environment';
 import { catchError, tap, switchAll } from 'rxjs/operators';
@@ -15,11 +16,12 @@ import { catchError, tap, switchAll } from 'rxjs/operators';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
   providers: [
-    WebSocketService, AuthService,
+    WebSocketService, AuthService, ApiService
   ]
 })
 export class AppComponent implements OnInit{
-  title = 'TomBug';
+  title = 'TeamIt';
+  user;
 
   offline: boolean = false;
   messages = [];
@@ -28,15 +30,22 @@ export class AppComponent implements OnInit{
   WS_ENDPOINT = environment.wsEndpoint;
   socket$: WebSocketSubject<any>;  
   
+  navUserDropdown: boolean = false;
+  isAuthenticated: boolean;
+  myPortals;
+
   constructor(
     private router: Router,
     private socket: WebSocketService,
     private auth: AuthService,
+    private api: ApiService,
   ){
     if (this.auth.isAuthenticated()) {
       this.websocketMessages();
+      this.setAuthenticationVars();
+
     }
-    }
+  }
 
   ngOnInit(): void {
     this.getNavHeight();
@@ -53,12 +62,41 @@ export class AppComponent implements OnInit{
     );
   }
 
+
+  getNavData = () => {
+    if (this.isAuthenticated) {
+      this.api.getNavData().subscribe(
+        data => {
+          this.myPortals = data.portals;
+        },
+        error => {
+          console.log(error);
+
+        }
+      );
+    }
+  }
+
+
   setMsg = (colour: string, text: string, title: string) => {
 	  this.messages.push({
 	    "colour": colour,
 	    "title": title,
 	    "text": text,
 	  });
+  }
+
+  setAuthenticationVars = () => {
+    if (this.auth.isAuthenticated()) {
+      this.isAuthenticated = true;
+      this.user = JSON.parse(sessionStorage.getItem('user'));
+      setTimeout(() => this.getNavData(), 1000);
+    }
+
+    else {
+      this.isAuthenticated = false;
+      this.user = undefined;
+    }
   }
 
   createOnline$() {
@@ -78,7 +116,31 @@ export class AppComponent implements OnInit{
   }
 
   mobileNav = (link) => {
-    this.router.navigate([`/${link}`]);
+    if (link == '/') {
+      this.router.navigate([`/${link}`]);
+    }
+    else {
+      if (this.auth.isAuthenticated()) {
+        $('#portalSelectModal').modal('show');
+      }
+    }
+  }
+
+  toggleNavUserDrpdwn = () => {
+    this.navUserDropdown = !this.navUserDropdown;
+  }
+
+  navigateForm = (navForm: NgForm, type: string) => {
+    const destination = navForm.value['destination_id'];
+
+    this.router.navigate([`/${type}/${destination}`]);
+    $('#portalSelectModal').modal('hide');
+  }
+
+  logout = () => {
+    this.auth.logout();
+    this.setAuthenticationVars();
+    this.router.navigate(['/login']);
   }
 
   websocketMessages = () => {
@@ -130,12 +192,10 @@ export class AppComponent implements OnInit{
 
   wsConnect(wsPath: string): Observable<any> {
     if (this.socket$ == undefined || this.socket$.closed) {
-      console.log(this.socket$);
       const userAuthToken = sessionStorage.getItem("userToken");
       let url = this.WS_ENDPOINT + wsPath +`?auth=${userAuthToken}`;
       
       this.socket$ = webSocket(url);
-      console.log(this.socket$);
       return this.socket$;
     }
     else if (this.socket$) {
@@ -166,5 +226,4 @@ export class AppComponent implements OnInit{
     };
     this.wsSendMessage(data);
   }
-
 }

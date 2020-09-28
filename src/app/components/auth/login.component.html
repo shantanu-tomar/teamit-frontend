@@ -1,26 +1,53 @@
 <div id="loginDiv" class="p-2" style="min-height: 100vh;">
-  <form id="loginForm" ngNativeValidate #form="ngForm" (ngSubmit)="authenticate(form)" class="col-md-6 col-12">
-    <h4 class="mb-3">Login to your account</h4>
-    <div class="form-group">
-    	<label>Email</label><span class="required text-danger">*</span>
-      <input type="email" class="form-control" name="email"
-             [(ngModel)]="email" required />
-    </div>
-    <div class="form-group">
-      <label>Password</label><span class="required text-danger">*</span>
-      <input class="form-control" type="password" name="password"
-             [(ngModel)]="password" required />
-    </div>
-    <div class="text-center">
-      <button class="btn btn-primary m-1" type="submit">Log In</button>
-    </div>
+  <div class="row">
+    <form id="loginForm" ngNativeValidate #form="ngForm" (ngSubmit)="authenticate(form)" class="card p-2 col-12 col-md-6 mt-4" style="margin: auto">
+      <h4 class="mb-3">
+        Login to your account
+        <small class="pull-right d-md-none d-inline">
+          <a class="text-primary" (click)='demoLoginScroll()'>try demo login</a>
+        </small>
+      </h4>
+      <div class="form-group">
+      	<label>Email</label><span class="required text-danger">*</span>
+        <input type="email" class="form-control" name="email"
+               [(ngModel)]="email" required />
+      </div>
+      <div class="form-group">
+        <label>Password</label><span class="required text-danger">*</span>
+        <input class="form-control" type="password" name="password"
+               [(ngModel)]="password" required />
+      </div>
+      <div class="text-center">
+        <button class="btn btn-primary m-1" type="submit">Log In</button>
+      </div>
 
-    <span class="text-muted">else, </span>
-    <a routerLink="/signup/">Sign Up</a>
-    <br/>
-    <span class="text-muted">forgot your password ? </span>
-    <a class="text-primary" data-toggle="modal" data-target="#forgotPassModalCenter">Reset here</a>
-  </form>
+      <span class="text-muted">else, </span>
+      <a routerLink="/signup/">Sign Up</a>
+      <br/>
+      <span class="text-muted">forgot your password ? </span>
+      <a class="text-primary" data-toggle="modal" data-target="#forgotPassModalCenter">Reset here</a>
+    </form>
+
+    <div id="sampleLoginDiv" class="card p-2 col-12 col-md-4 offset-md-2 mt-4" style="margin: auto">
+      <h4 class="mb-3"><small>or,</small> Try Demo Users:</h4>
+
+      <div class="container">
+        <div class="row">
+          <div class="demo-user col-6 col-md-6 text-center" (click)="demoLogin('admin')">
+            <img src="static/images/me.jpg" width="100" height="100" class="rounded-circle"><br/><br/>
+            <h5>Administrator</h5>
+            <span class="text-muted">( Sherlock Holmes )</span>
+          </div>
+
+          <div class="demo-user col-6 col-md-6 text-center" (click)="demoLogin('non-admin')">
+            <img src="static/images/me.jpg" width="100" height="100" class="rounded-circle"><br/><br/>
+            <h5>Non-Admin</h5>
+            <span class="text-muted">( John Watson )</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- FORGOT PASSWORD MODAL -->
   <div class="modal fade" id="forgotPassModalCenter" tabindex="-1" role="dialog" aria-labelledby="forgotPassModalTitle" aria-hidden="true">

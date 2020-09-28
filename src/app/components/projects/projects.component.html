@@ -5,8 +5,77 @@
 		<div class="col-12 mt-3">
 			<div class="card" style="overflow-x: auto">
 				<!-- Overriding inbuilt edit button -->
-				<ng2-smart-table [settings]="settings" [source]="source" (edit)="projectDetails($event)"></ng2-smart-table>
+				<ng2-smart-table 
+				[settings]="settings" 
+				[source]="source" 
+				(edit)="projectDetails($event)"
+				(create)="addProjectEvent()"></ng2-smart-table>
 			</div>
 		</div>
 	</div>
+
+
+	<div class="card container" id="addProjectDiv" style="margin-top: 50px">
+		<form #addProjectForm='ngForm' ngNativeValidate class="card-body form" (ngSubmit)="addProject(addProjectForm)" [hidden]='!showProjectForm'>
+			<div class="form-row mt-3">
+        <div class="col-12 col-md-6">
+          <label for="portal" class="input-label">Portal Name</label><span class="required">*</span><br/>
+          <input class="form-control" type="text" name="portal" [(ngModel)]="portal" required disabled />
+        </div>
+
+        <div class="col-12 col-md-6 mt-3 mt-md-0">
+          <label for="title" class="input-label">Project Title</label><span class="required">*</span><br/>
+          <input class="form-control" type="text" name="title" ngModel required maxlength="20" />
+        </div>
+			</div>
+
+			<div class="form-row mt-3">
+        <div class="col-12">
+          <label for="description" class="input-label">Description</label><br/>
+          <textarea class="form-control" name="description" ngModel></textarea>
+        </div>
+			</div>
+
+			<div class="form-row mt-3">
+        <div class="col-12 col-md-6">
+          <label for="reference_link" class="input-label">Reference Link (optional)</label><br/>
+          <input class="form-control" type="url" name="reference_link" ngModel />
+        </div>
+	
+        <div class="col-12 col-md-6 mt-3 mt-md-0">
+          <label for="start_date" class="input-label">Start Date</label><span class="required">*</span><br/>
+          <input class="form-control" type="date" name="start_date" ngModel required />
+        </div>
+      </div>
+
+			<div class="form-row mt-3">
+        <div class="col-12 col-md-6">
+          <label for="end_date" class="input-label">End Date</label><br/>
+          <input class="form-control" type="date" name="end_date" ngModel />
+        </div>
+
+        <div class="col-12 col-md-6 mt-3 mt-md-0">
+          <label for="status" class="input-label">Status</label><span class="required">*</span><br/>
+          
+          <select class="form-control" ngModel required name="status">
+          	<ng-container *ngIf="projectChoices">
+            	<ng-container *ngFor="let status of projectChoices['PROJECT_STATUSES']">
+            		<option value="{{status[0]}}">{{status[1]}}</option>
+            	</ng-container>
+            </ng-container>
+          </select>
+        </div>
+      </div>
+
+			<div class="form-row mt-3">
+        <div class="col-12 col-md-6">
+          <input type="checkbox" name="completed" class="mr-2" ngModel />
+          <label for="completed">Completed ?</label><br/>
+        </div>
+			</div>
+		 
+      <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+	</div>
 </div>
+

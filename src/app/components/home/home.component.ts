@@ -2,15 +2,17 @@ import { Component, OnInit } from '@angular/core';
 import { ChartOptions, ChartType, ChartDataSets } from 'chart.js';
 import { MultiDataSet, Label, Color } from 'ng2-charts';
 import { ApiService } from 'src/app/services/api.service';
+import { SharedService } from 'src/app/services/shared.service';
 import { Router } from '@angular/router';
 import {Title} from "@angular/platform-browser";
+import { NgForm } from '@angular/forms';
 
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
-  providers: [ApiService],
+  providers: [ApiService, SharedService],
 })
 export class HomeComponent implements OnInit {
 
@@ -37,8 +39,11 @@ export class HomeComponent implements OnInit {
   myDueTickets = new Array();
   dueMilestones = new Array();
   
+  creatingPortal: boolean = false;
+
   constructor(
     private api: ApiService,
+    private shared: SharedService,
     private router: Router,
     private titleService: Title,
   ) {
@@ -100,13 +105,96 @@ export class HomeComponent implements OnInit {
 
   }
 
+
   portalProjects = (name) => {
     this.router.navigate([`/portals/${name}`]);
   }
+
 
   milestoneDetails = (stone) => {
     this.router.navigate([
       `portals/${stone['project']['portal']['name']}/projects/${stone['project']['id']}/milestones`]
       , {queryParams: {m: stone['id']}});
+  }
+
+
+  addPortal = (addPortalForm: NgForm) => {
+    let data = {
+      "name": addPortalForm.value['name'],
+    };
+
+    this.creatingPortal = true;
+    
+    this.api.addPortal(data).subscribe(
+      response => {
+        if (response.available) {
+          this.creatingPortal = false;
+          this.shared.setToast("Portal created successfully!", "green");
+          $('#addPortalModal').modal('hide');
+
+          this.getHomeVars();
+        }
+        else if (!response.available) {
+          this.creatingPortal = false;
+          document.getElementById('portalUnavailable').style.display = 'unset';
+        }
+
+      },
+      error => {
+        console.log(error);
+        this.creatingPortal = false;
+      }
+    );
+  }
+
+
+  addProject = (addProjectForm) => {
+    $('#addProjectModal').modal('hide');
+
+    const portal = addProjectForm.value['portal_select'];
+    this.router.navigate(['/portals/' +portal], {queryParams: {'action': 'add'}});
+  }
+
+
+  validateFunctionLock: boolean = false;
+  validationTimeout: ReturnType<typeof setTimeout> ;
+
+  validatePortalName = (name, event) => {
+    console.log("FIRE ", event);
+    console.log(this.validateFunctionLock);
+
+    if (event.target.validity.valid) {
+      console.log("valid");
+
+      if (!this.validateFunctionLock) {
+        this.validateFunctionLock = true;
+
+        this.validationTimeout = setTimeout(() => {
+          this.validateFunctionLock = false;
+          let data = {
+            "name": name,
+          };
+
+          this.api.validatePortalName(data).subscribe(
+            response => {
+              console.log(response);
+            },
+            error => {
+              console.log(error);
+            }
+          );
+        }, 2000);
+      }
+
+      else if (this.validateFunctionLock) {
+        this.validateFunctionLock = false;
+        clearTimeout(this.validationTimeout);
+        this.validatePortalName(name, event);
+      }
+    }
+  }
+
+  navigateForm = (navForm: NgForm) => {
+    console.log(navForm.value);
   }
 }

@@ -246,8 +246,6 @@ export class MilestoneDetailsComponent implements OnInit, OnDestroy{
 
         // Updating milestone table
         this.projectMilestones.push(response);
-        console.log(this.projectMilestones);
-        console.log(this.tableData);
         this.makeTableSource();
       },
       error => {
@@ -289,9 +287,26 @@ export class MilestoneDetailsComponent implements OnInit, OnDestroy{
       "project_id": this.projectId,
     }
 
-    this.socket.sendMessage(data);
+      try {
+      this.socket.sendMessage(data);
+    }
+    catch(error) {
+      this.commentOverHTTP(milestoneId, data);
+    }
     commentForm.reset();
   }
+
+  commentOverHTTP = (milestoneId, comment) => {
+    this.api.milestoneComment(this.portal, this.projectId, milestoneId, comment).subscribe(
+      response => {
+        this.selectedMilestoneComments = response;
+      },
+      error => {
+        console.log(error);
+      }
+    );
+  }
+
 
   deleteMilestone = (milestoneId) => {
     let sure = confirm("Are you sure you wish to delete this milestone ?");

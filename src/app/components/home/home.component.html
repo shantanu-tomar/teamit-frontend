@@ -4,16 +4,32 @@
 	<div class="row">
 		<div class="col-12 col-md-6 mt-3 mt-md-4">
 			<div class="card info-card-sm">
-				<h6 class="card-title"><b>Your Portals</b></h6>
+				<h6 class="card-title">
+					<b>Your Portals</b>
+					<a class="text-primary" data-toggle="modal" data-target="#addPortalModal">
+						<small class="pull-right mr-3 mt-1">Create new portal</small>
+					</a>
+				</h6>
 				<small class="text-muted card-subtitle">Portals you are a member of</small>
 				<div class="card-body mt-1 mx-1 card-body_list">
-					<ul class="list-unstyled custom-list">
+					<ul *ngIf="myPortals.length > 0; else noPortals" class="list-unstyled custom-list">
 						<li *ngFor="let portal of myPortals">
 							<a routerLink="portals/{{portal['name']}}/">
 							{{portal['name']}}
 							</a>
 						</li>
 					</ul>
+
+					<ng-template #noPortals>
+						<div class="text-center">
+							<p><small>No Portals yet. You must create a portal first to be able to create a project under it. Each portal can have multiple projects under it.</small><br/><br/>
+								<a class="text-primary" data-toggle="modal" data-target="#addPortalModal">
+									<i class="fa fa-plus-square mr-1"></i>
+									Create a portal here
+								</a>
+							</p>
+						</div>
+					</ng-template>
 				</div>
 			</div>
 		</div>
@@ -21,11 +37,16 @@
 		<div class="col-12 col-md-6 mt-3 mt-md-4">
 			<div class="card info-card-sm">
 
-				<h6 class="card-title"><b>Your Projects</b></h6>
+				<h6 class="card-title">
+					<b>Your Projects</b>
+					<a class="text-primary" data-toggle="modal" data-target="#addProjectModal">
+						<small class="pull-right mr-3 mt-1">Create new project</small>
+					</a>
+				</h6>
 				<small class="text-muted card-subtitle">Projects you are a member of</small>
 				<div class="card-body mt-1 mx-1 card-body_list">
 					
-					<ul class="list-unstyled custom-list">
+					<ul *ngIf='myProjects.length > 0; else noProjects' class="list-unstyled custom-list">
 						<li *ngFor="let project of myProjects">
 							<a routerLink="portals/{{project['portal']['name']}}/projects/{{project['id']}}/">
 								{{project['title']}}
@@ -37,6 +58,17 @@
 							</span>
 						</li>
 					</ul>
+
+					<ng-template #noProjects>
+						<div class="text-center">
+							<p>No Projects yet.<br/><br/>
+								<a *ngIf="myPortals.length > 0" data-toggle="modal" data-target="#addProjectModal">
+									<i class="fa fa-plus-square mr-1"></i>
+									Create a project here.
+								</a>
+							</p>
+						</div>
+					</ng-template>
 				</div>
 			</div>
 		</div>
@@ -66,7 +98,13 @@
 
 				<ng-template #noMilestone>
 					<div class="card-body text-center">
-						No Milestones To Be Achieved
+						<p>
+							No Milestones To Be Achieved<br/><br/>
+							<a *ngIf="myProjects.length > 0">
+								<i class="fa fa-plus-square mr-1"></i>
+								Create a milestone here.
+							</a>
+						</p>
 					</div>
 				</ng-template>
 			</div>
@@ -106,10 +144,96 @@
 
 				<ng-template #noDoughnut>
 					<div class="card-body text-center">
-						No Tickets Yet
+						<p>
+							No Tickets Yet<br/><br/>
+							<a *ngIf="myProjects.length > 0">
+								<i class="fa fa-plus-square mr-1"></i>
+								Create a ticket here.
+							</a>
+						</p>
 					</div>
 				</ng-template>
 			</div>
+		</div>
+	</div>
+</div>
+
+
+<!-- ADD PORTAL MODAL -->
+<div class="modal fade" id="addPortalModal" tabindex="-1" role="dialog" aria-labelledby="addPortalModalTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+		  <div class="modal-header">
+				<h5 class="modal-title" id="addPortalModalTitle">Create New Portal</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				  <span aria-hidden="true">&times;</span>
+				</button>
+		  </div>
+			
+			<form #addPortalForm='ngForm' ngNativeValidate class="card-body form" (ngSubmit)="addPortal(addPortalForm)" >
+				<h6>Each portal can have many projects under them.</h6>
+		  	<div class="modal-body">
+	      	<fieldset>
+	          <div class="form-row">
+	            <div class="col-12">
+		            <label for="portal" class="input-label">Portal Name</label><span class="required">*</span><br/>
+		            <input type='text' name='portal' class='form-control' maxlength="10" required pattern="[a-z0-9]+" name="name" ngModel />
+
+		            <small id="portalUnavailable" class="text-danger" style="display: none">This portal name is not available.</small>
+		          </div>
+
+		          <ul class="text-muted list-unstyled mt-3">
+		          	<li><small>Each portal must have a unique name.</small></li>
+		          	<li><small>Portal name can only contain lowercase alphabets and numbers.</small></li>
+		          </ul>
+	          </div>
+	        </fieldset>
+			  </div>
+			  
+				<div class="modal-footer">
+					<div *ngIf="creatingPortal" class="spinner-border spinner-border-sm" role="status">
+					  <span class="sr-only">Loading...</span>
+					</div>
+	        <button type="submit" class="btn btn-primary">Create Portal</button>
+				</div>
+	    </form>
+		</div>
+	</div>
+</div>
+
+
+<!-- ADD PROJECT MODAL -->
+<div class="modal fade" id="addProjectModal" tabindex="-1" role="dialog" aria-labelledby="addProjectModalTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+		  <div class="modal-header">
+				<h5 class="modal-title" id="addProjectModalTitle">Create New Project</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				  <span aria-hidden="true">&times;</span>
+				</button>
+		  </div>
+			
+			<form #addProjectForm='ngForm' ngNativeValidate class="card-body form" (ngSubmit)="addProject(addProjectForm)" >
+				<h6>Choose a portal to create a project under.</h6>
+		  	<div class="modal-body">
+	      	<fieldset>
+	          <div class="form-row">
+	            <div class="col-12">
+		            <label for="portal" class="input-label">Portal Name</label><span class="required">*</span><br/>
+		            <select name='portal_select' class='form-control' required ngModel>
+		            	<ng-container *ngFor="let portal of myPortals">
+		            		<option value="{{portal['name']}}">{{portal['name']}}</option>
+		            	</ng-container>
+		            </select>
+		          </div>
+						</div>
+	        </fieldset>
+			  </div>
+			  
+				<div class="modal-footer">
+	        <button type="submit" class="btn btn-primary">Proceed</button>
+				</div>
+	    </form>
 		</div>
 	</div>
 </div>

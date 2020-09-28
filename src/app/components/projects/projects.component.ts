@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { LocalDataSource } from 'ng2-smart-table';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ApiService } from 'src/app/services/api.service';
+import { SharedService } from 'src/app/services/shared.service';
 import {Title} from "@angular/platform-browser";
+import { NgForm } from '@angular/forms';
 
 
 @Component({
@@ -10,23 +12,21 @@ import {Title} from "@angular/platform-browser";
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.css'],
   providers: [
-    ApiService,
+    ApiService, SharedService,
   ]
 })
 export class ProjectsComponent implements OnInit {
   settings = {
     actions: {
-      add: false,
       delete: false
     },
     edit: {
       editButtonContent: '<i class="btn-sm btn-outline-info w-100">Details</i>',
     },
+    add: {
+      addButtonContent: '<i class="btn btn-info w-100">Add</i>',
+    },
     columns: {
-      // id: {
-      //   title: 'ID',
-      //   type: 'text',
-      // },
       title: {
         title: 'Project Name',
         type: 'string',
@@ -69,15 +69,19 @@ export class ProjectsComponent implements OnInit {
   };
 
   portal: string;
+  userIsOwner: boolean = false;
   projects = new Array();
-
+  projectChoices;
 
   tableData = new Array();
   source: LocalDataSource;
+  showProjectForm: boolean = false;
+
 
   constructor(
     private router: Router,
     private api: ApiService,
+    private shared: SharedService,
     private route: ActivatedRoute,
     private titleService: Title,
   ) {
@@ -86,6 +90,16 @@ export class ProjectsComponent implements OnInit {
 
   ngOnInit(): void {
     this.getProjects();
+
+    // subscribe to queryparams
+    this.route.queryParams.subscribe(params => {
+      const action = params['action'];
+      if (action == 'add') {
+        this.shared.scrollToDiv('addProjectDiv', 1000);
+        this.getProjectChoices();
+        this.showProjectForm = true;
+      }
+    });
   }
 
   getProjects = () => {
@@ -94,7 +108,8 @@ export class ProjectsComponent implements OnInit {
     this.api.getProjects(this.portal).subscribe(
       data => {
         this.projects = data.projects;
-        this.setVariables(data);
+        this.userIsOwner = data.portal_owner;
+        this.setVariables(this.projects);
       },
       error => {
         console.log(error);
@@ -102,9 +117,11 @@ export class ProjectsComponent implements OnInit {
     )
   }
 
-  setVariables = (data) => {
-    if (this.projects.length > 0 ) {
-      for (let project of this.projects){
+  setVariables = (projects) => {
+    this.source = new LocalDataSource(); // empty existing source (if any)
+    
+    if (projects.length > 0 ) {
+      for (let project of projects){
         let tempData = {
           "id": project["id"],
           "title": project["title"],
@@ -121,12 +138,51 @@ export class ProjectsComponent implements OnInit {
         this.source = new LocalDataSource(this.tableData); // create the source
       }
     }
+
   }
 
   projectDetails = (event: any) => {
     let projectId = event.data.id;
 
     this.router.navigate([`portals/${this.portal}/projects/${projectId}`]);
+  }
+
+  addProjectEvent = () => {
+    if (this.userIsOwner) {
+      this.router.navigate([], {relativeTo: this.route, queryParams: {action: 'add'}});
+      this.getProjectChoices();
+      this.showProjectForm = true;
+    }
+    else {
+      this.shared.setMsg("danger", "You, not being an owner of this portal, cannot add a project.", null);
+    }
+  }
+
+  getProjectChoices = () => {
+    this.api.getProjectChoices().subscribe(
+      data => {
+        this.projectChoices = data;
+      },
+      error => {
+        console.log(error);
+      }
+    );
+  }
+
+  addProject = (addProjectForm: NgForm) => {
+    let data = addProjectForm.value;
+    data['portal'] = this.portal;
+
+    this.api.createProject(this.portal, data).subscribe(
+      response => {
+        this.shared.setToast("Project created successfully!", "green");
+        this.projects.push(response.project);
+        this.setVariables(this.projects);
+      },
+      error => {
+        console.log(error);
+      }
+    );
   }
 
 }

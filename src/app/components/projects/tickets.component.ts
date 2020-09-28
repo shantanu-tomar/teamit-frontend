@@ -129,7 +129,8 @@ export class TicketsComponent implements OnInit, OnDestroy {
     this.socket.close();
     let wsPath = `/ws/comments/t/${ticketId}/`;
 
-    this.socket.connect(wsPath).subscribe(
+    setTimeout(() => {
+      this.socket.connect(wsPath).subscribe(
       response => {
         this.selectedTicketComments.push(response.comment);
       },
@@ -137,6 +138,7 @@ export class TicketsComponent implements OnInit, OnDestroy {
         console.log(error);
       }
     );
+    }, 500);
   }
 
   setVars = (data) => {
@@ -271,8 +273,24 @@ export class TicketsComponent implements OnInit, OnDestroy {
       "project_id": this.projectId,
     }
 
-    this.socket.sendMessage(data);
+    try {
+      this.socket.sendMessage(data);
+    }
+    catch(error) {
+      this.commentOverHTTP(ticketId, data);
+    }
     commentForm.reset();
+  }
+
+  commentOverHTTP = (ticketId, comment) => {
+    this.api.ticketComment(this.portal, this.projectId, ticketId, comment).subscribe(
+      response => {
+        this.selectedTicketComments = response;
+      },
+      error => {
+        console.log(error);
+      }
+    );
   }
 
   deleteTicket = (ticketId) => {

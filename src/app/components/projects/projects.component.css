@@ -5,3 +5,7 @@ a {
 :host>>>.ng2-smart-pagination-nav {
 	margin: auto !important;
 }
+
+form label {
+	font-size: 0.9rem;
+}

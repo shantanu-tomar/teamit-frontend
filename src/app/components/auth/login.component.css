@@ -1,0 +1,9 @@
+.demo-user {
+	cursor: pointer;
+	border-radius: 10%;
+	padding-top: 20px;
+}
+
+.demo-user:hover {
+	background-color: #E4E7EC;
+}

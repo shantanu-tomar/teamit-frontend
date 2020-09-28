@@ -11,8 +11,8 @@
     <a class="navbar-brand" routerLink="/" style="font-family: 'Calistoga'; color: white; text-decoration: none;">TeamIt</a>
   </div>
   
-  <div style="position: relative; right: 0px;" class="ml-auto pull-right">
-    <a class="nav-item nav-link" style="display: inline; color:white" routerLink="/messages">
+  <div *ngIf="isAuthenticated" style="position: relative; right: 0px;" class="ml-auto pull-right">
+    <a class="nav-item nav-link mr-2" style="display: inline; color:white" routerLink="/messages">
       <span class="fa-stack">
         <i class="fa fa-comments navIcon fa-stack-1x" aria-hidden="true">
           <span class="navIconCaption">Messages</span>
@@ -20,7 +20,7 @@
       </span>
     </a>
     
-    <a class="nav-item nav-link" style="display: inline; color:white" routerLink="/profile">
+    <a class="nav-item nav-link" [class.active]="navUserDropdown" style="display: inline; color:white" (click)="toggleNavUserDrpdwn()">
       <span class="fa-stack">
         <i class="fa fa-user-o navIcon fa-stack-1x" aria-hidden="true">
           <span class="navIconCaption">User</span>
@@ -30,7 +30,35 @@
   </div>
 </nav>
 
-<div style="height: 52px"></div>
+<div [hidden]="!navUserDropdown" id="navUserDropdown" class="col-md-3" (click)="toggleNavUserDrpdwn()">
+  <div class="text-white">
+    <label>Hello, 
+      <b *ngIf="isAuthenticated">{{user["name"]}}</b>
+      <b *ngIf="isAuthenticated && user['name'] == null">{{user["email"]}}</b>
+    </label>
+  </div>
+  
+  <div class="dropdown-divider"></div>
+  
+  <ul class="list-group list-unstyled">
+    <li>
+      <a class="nav-link nav-item" routerLink="/profile">Profile
+      </a>
+    </li>
+  </ul>
+  
+  <div class="dropdown-divider"></div>
+
+  <div class="m-2" *ngIf="isAuthenticated">
+    <button class="btn-sm btn-danger" (click)="logout()">
+      Logout
+      <i class="fa fa-sign-out" aria-hidden="true"></i>
+    </button>
+  </div>
+</div>
+
+
+<div id="navPlaceholderDiv"></div>
 
 <div *ngIf="messages.length > 0" id="alert-div">
   <ng-container *ngFor="let message of messages">
@@ -57,9 +85,19 @@
           Dashboard Home
       </option>
 
-      <option value="projects">
-        <i class="fa fa-users mr-2" aria-hidden="true"></i>
-          Projects
+      <option value="modal">
+        <i class="fa fa-bars mr-2" aria-hidden="true"></i>
+          My Projects
+      </option>
+
+      <option value="modal">
+        <i class="fa fa-user-plus mr-2" aria-hidden="true"></i>
+          Manage Role Assignment
+      </option>
+
+      <option value="modal">
+        <i class="fa fa-list mr-2" aria-hidden="true"></i>
+        My Tickets
       </option>
     </select>
   </div>
@@ -77,25 +115,19 @@
             </a>
           </li>
           <li>
-            <a routerLink="projects">
-              <i class="fa fa-users mr-2" aria-hidden="true"></i>
-              Manage Projects
-            </a>
-          </li>
-          <li>
-            <a>
+            <a data-toggle="modal" data-target="#portalSelectModal">
               <i class="fa fa-user-plus mr-2" aria-hidden="true"></i>
               Manage Role Assignment
             </a>
           </li>
           <li>
-            <a>
+            <a data-toggle="modal" data-target="#portalSelectModal">
               <i class="fa fa-bars mr-2" aria-hidden="true"></i>
               My Projects
             </a>
           </li>
           <li>
-            <a>
+            <a data-toggle="modal" data-target="#portalSelectModal">
               <i class="fa fa-list mr-2" aria-hidden="true"></i>
               My Tickets
             </a>
@@ -133,9 +165,42 @@
     </div>
   </div>
 
+  <!-- NAV PORTAL SELECT -->
+<div *ngIf='isAuthenticated' class="modal fade" id="portalSelectModal" tabindex="-1" role="dialog" aria-labelledby="portalSelectModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Select portal to navigate</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      
+      <form #navPortalSelect='ngForm' ngNativeValidate class="card-body form" (ngSubmit)="navigateForm(navPortalSelect, 'portals')" >
+        <div class="modal-body">
+          <fieldset>
+            <div class="form-row">
+              <div class="col-12">
+                <label for="portal" class="input-label">Portal Name</label><span class="required">*</span><br/>
+                <select name='destination_id' class='form-control' required ngModel>
+                  <ng-container *ngFor="let portal of myPortals">
+                    <option value="{{portal['name']}}">{{portal['name']}}</option>
+                  </ng-container>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Proceed</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
-
-  <div *ngIf="offline" id="network_banner" class="col-12 col-md-3 p-1">
+<div *ngIf="offline" id="network_banner" class="col-12 col-md-3 p-1">
     <i class="fa fa-signal mr-3 text-danger" aria-hidden="true"></i>
     No network connection !
   </div>

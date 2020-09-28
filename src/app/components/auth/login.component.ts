@@ -48,37 +48,41 @@ export class LoginComponent implements OnInit {
   
   authenticate = (form: NgForm) => {
     if (form.valid) {
-      
-      // perform authentication
-      this.auth.authenticate(this.email, this.password).subscribe(
-
-        response => {
-          sessionStorage.setItem("userToken", response.token);
-          sessionStorage.setItem("portals", JSON.stringify(response.portals));
-          sessionStorage.setItem("user", JSON.stringify(response.user));
-          this.router.navigate([`/${this.nextRoute}`]);
-          this.shared.websocketMessagesConnect();
-          // this.shared.refreshAppComponent();
-        },
-
-        error => { 
-          console.log(error);
-          if (error.error.non_field_errors) {
-            for (let e of error.error.non_field_errors){
-              this.shared.setMsg(
-              'danger', e, null);
-            }
-          }
-          else {
-            this.shared.setMsg(
-            'danger', "An error occured. Please retry.", null);
-          }
-        }
-      )
+      this.performAuthentication();
     }
     else {
       this.shared.setMsg('danger', 'Authentication Failed.', null);
     }
+  }
+
+
+  performAuthentication = () => {
+    // perform authentication
+    this.auth.authenticate(this.email, this.password).subscribe(
+
+      response => {
+        sessionStorage.setItem("userToken", response.token);
+        sessionStorage.setItem("portals", JSON.stringify(response.portals));
+        sessionStorage.setItem("user", JSON.stringify(response.user));
+        this.router.navigate([`/${this.nextRoute}`]);
+        this.shared.websocketMessagesConnect();
+        this.shared.refreshAppComponent();
+      },
+
+      error => { 
+        console.log(error);
+        if (error.error.non_field_errors) {
+          for (let e of error.error.non_field_errors){
+            this.shared.setMsg(
+            'danger', e, null);
+          }
+        }
+        else {
+          this.shared.setMsg(
+          'danger', "An error occured. Please retry.", null);
+        }
+      }
+    )
   }
 
 
@@ -100,5 +104,23 @@ export class LoginComponent implements OnInit {
         console.log(error);
       }
     );
+  }
+
+
+  demoLogin = (user) => {
+    if (user == 'admin') {
+      this.email = 'sherlock@bakerstreet.com';
+      this.password = 'demouseradmin';
+    }
+    else if (user == 'non-admin') {
+      this.email = 'watson@bakerstreet.com';
+      this.password = 'demousernonadmin';
+    }
+
+    this.performAuthentication();
+  }
+
+  demoLoginScroll = () => {
+    this.shared.scrollToDiv('sampleLoginDiv', 500);
   }
 }

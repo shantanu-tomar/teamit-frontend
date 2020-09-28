@@ -34,14 +34,32 @@ export class ApiService {
   }
 
 
+  getNavData(): Observable<any>{
+    return this.http.get(this.baseUrl +'/nav-data/',
+      {headers: this.httpHeaders});
+  }
+
+  
   getHome(): Observable<any>{
     return this.http.get(this.baseUrl +'/home/',
       {headers: this.httpHeaders});
   }
 
 
+  validatePortalName(data): Observable<any>{
+    return this.http.post(this.baseUrl +'/validate-portal/', data, 
+      {headers: this.httpHeaders});
+  }
+
+
   getPortals(): Observable<any>{
     return this.http.get(this.baseUrl +'/portals/',
+      {headers: this.httpHeaders});
+  }
+
+
+  addPortal(data): Observable<any>{
+    return this.http.post(this.baseUrl +'/portals/', data,
       {headers: this.httpHeaders});
   }
 
@@ -54,6 +72,12 @@ export class ApiService {
 
   getProjectDetails(portal: string, id: number): Observable<any>{
     return this.http.get(this.baseUrl +`/portals/${portal}/projects/${id}`,
+      {headers: this.httpHeaders});
+  }
+
+
+  createProject(portal, data): Observable<any>{
+    return this.http.post(this.baseUrl +`/portals/${portal}/projects/`, data,
       {headers: this.httpHeaders});
   }
 
@@ -137,6 +161,11 @@ export class ApiService {
 
 
   // TICKETS
+
+  getUserTickets(): Observable<any>{
+    return this.http.get(
+      this.baseUrl +`/user-tickets/`, {headers: this.httpHeaders});
+  }
 
   ticketUpdate(portal: string, projId: number, tickId: number, data: object): Observable<any>{
     return this.http.patch(

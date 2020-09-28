@@ -82,6 +82,10 @@ export class SharedService {
     return this.api.getProjectChoices();
   }
 
+  refreshAppComponent = () => {
+    this.app.setAuthenticationVars();
+  }
+
   // WEBSOCKET
   websocketMessagesConnect = () => {
     this.app.websocketMessages();
